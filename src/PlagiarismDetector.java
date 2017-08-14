@@ -21,17 +21,22 @@ public class PlagiarismDetector {
 
 	public static Map<String, Integer> detectPlagiarism(String dirName, int windowSize, int threshold) {
 		File dirFile = new File(dirName);
+		// .list() gets a list of all the dirs inside the given directory //
 		String[] files = dirFile.list();
 		
 		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
-		
+		// go through list of files //
 		for (int i = 0; i < files.length; i++) {
+			// get each file //
 			String file1 = files[i];
-
+			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+			// compare each file to every other file //
 			for (int j = 0; j < files.length; j++) { 
 				String file2 = files[j];
 				
-				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+				// get the set of phrases from each file //
+				// instead of doing this for file1 each time, only create the file1 Set once
+//				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
 				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
 				
 				if (file1Phrases == null || file2Phrases == null)
@@ -41,9 +46,13 @@ public class PlagiarismDetector {
 				
 				if (matches == null)
 					return null;
-								
+				
+				// checks if number of matches is above the given threshold value //
 				if (matches.size() > threshold) {
+					// creates the string for the key //
 					String key = file1 + "-" + file2;
+					// checks if string is already in numberOfMathces //
+					// checks if theey are not the same file //
 					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
 						numberOfMatches.put(key,matches.size());
 					}
@@ -143,15 +152,10 @@ public class PlagiarismDetector {
 		
 		// Because this approach modifies the Map as a side effect of printing 
 		// the results, it is necessary to make a copy of the original Map
+		
 		Map<String, Integer> copy = new HashMap<String, Integer>(possibleMatches);
-		
-		// this is just copying the data from one Map to the other //
-		
-		// 1. I removed this piece of code, and passed in possibleMatches as an arg to the Map constructor. API!
-		
-//		for (String key : possibleMatches.keySet()) {
-//			copy.put(key, possibleMatches.get(key));
-//		}	
+		// 1. I removed the code that was copying the structure. Instead used the API!
+	
 		
 		LinkedHashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
 		// what is another structure that would serve this purpose, and be smaller? 
