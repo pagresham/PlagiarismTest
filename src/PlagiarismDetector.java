@@ -29,17 +29,20 @@ public class PlagiarismDetector {
 		for (int i = 0; i < files.length; i++) {
 			// get each file //
 			String file1 = files[i];
+			// Get the phrases from file 1
+			// instead of doing this for file1 each time, only create the file1 Set once
 			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+			if ( file1Phrases == null ) {
+				return null;
+			}
 			// compare each file to every other file //
 			for (int j = 0; j < files.length; j++) { 
 				String file2 = files[j];
 				
-				// get the set of phrases from each file //
-				// instead of doing this for file1 each time, only create the file1 Set once
-//				Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+				// get the set of phrases from file2  //
 				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
 				
-				if (file1Phrases == null || file2Phrases == null)
+				if (file2Phrases == null)
 					return null;
 				
 				Set<String> matches = findMatches(file1Phrases, file2Phrases);
