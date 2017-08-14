@@ -1,7 +1,11 @@
 
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -24,12 +28,15 @@ public class PlagiarismDetector {
 		File dirFile = new File(dirName);
 		// .list() gets a list of all the dirs inside the given directory //
 		String[] files = dirFile.list();
+		// get length in var so it doesnt have to be calculated each time
+		int length = files.length;
 		
 		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
 		// go through list of files //
-		for (int i = 0; i < files.length; i++) {
+		for (int i = 0; i < length; i++) {
 			// get each file //
 			String file1 = files[i];
+			
 			// Get the phrases from file 1
 			// instead of doing this for file1 each time, only create the file1 Set once
 			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
@@ -37,7 +44,7 @@ public class PlagiarismDetector {
 				return null;
 			}
 			// compare each file to every other file //
-			for (int j = 0; j < files.length; j++) { 
+			for (int j = 0; j < length; j++) { 
 				String file2 = files[j];
 				
 				// get the set of phrases from file2  //
@@ -46,20 +53,23 @@ public class PlagiarismDetector {
 				if (file2Phrases == null)
 					return null;
 				
+				// Maybe instead of returning a Set of strings, and then checking its size, 
+				// find matches just returns an int.
+				
 				// creates a Set<String> with the matching phrases between the two files //
-				Set<String> matches = findMatches(file1Phrases, file2Phrases);
+				List<String> matches = findMatches(file1Phrases, file2Phrases);
 				// Why would this return null? //
 				if (matches == null)
 					return null;
-				
+				int size = matches.size();
 				// checks if number of matches is above the given threshold value //
-				if (matches.size() > threshold) {
+				if (size > threshold) {
 					// creates the string for the key //
 					String key = file1 + "-" + file2;
 					// checks if string is already in numberOfMathces //
-					// checks if theey are not the same file //
+					// checks if they are not the same file //
 					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
-						numberOfMatches.put(key,matches.size());
+						numberOfMatches.put(key, size);
 					}
 				}				
 			}
@@ -134,14 +144,19 @@ public class PlagiarismDetector {
 	 * Returns a Set of Strings that occur in both of the Set parameters.
 	 * However, the comparison is case-insensitive.
 	 */
-	protected static Set<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
+//	protected static Set<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
+	// Here I changed the return type from Set to ArrayList, 
+	protected static List<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
 		if(myPhrases == null || yourPhrases == null) {
 			return null;
 		}
 		else {
-			Set<String> matches = new HashSet<String>();
+//			Set<String> matches = new HashSet<String>();
+			List<String> matches = new ArrayList<>();
 			for (String mine : myPhrases) {
+				
 				for (String yours : yourPhrases) {
+					
 					if (mine.equalsIgnoreCase(yours)) {
 						matches.add(mine);
 					}
@@ -149,13 +164,15 @@ public class PlagiarismDetector {
 			}
 			return matches;
 		}
+		
+		
 	}
 	
 	/*
 	 * Returns a LinkedHashMap in which the elements of the Map parameter
 	 * are sorted according to the value of the Integer, in non-ascending order.
 	 */
-	protected static LinkedHashMap<String, Integer> sortResults(Map<String, Integer> possibleMatches) {
+	protected static HashMap<String, Integer> sortResults(Map<String, Integer> possibleMatches) {
 		
 		// Because this approach modifies the Map as a side effect of printing 
 		// the results, it is necessary to make a copy of the original Map
@@ -164,7 +181,7 @@ public class PlagiarismDetector {
 		// 1. I removed the code that was copying the structure. Instead used the API!
 	
 		
-		LinkedHashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
+		HashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
 		// what is another structure that would serve this purpose, and be smaller? 
 		// Must be a mapping, and must be in order
 		
