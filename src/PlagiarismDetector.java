@@ -85,6 +85,7 @@ public class PlagiarismDetector {
 			while (in.hasNext()) {
 				words.add(in.next().replaceAll("[^a-zA-Z]", "").toUpperCase());
 			}
+			in.close();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -101,7 +102,8 @@ public class PlagiarismDetector {
 	 */
 	protected static Set<String> createPhrases(String filename, int window) {
 		if (filename == null || window < 1) return null;
-				
+		
+		// This now returns an arrayList //
 		List<String> words = readFile(filename);
 		
 		Set<String> phrases = new HashSet<String>();
@@ -133,11 +135,11 @@ public class PlagiarismDetector {
 	 * However, the comparison is case-insensitive.
 	 */
 	protected static Set<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
-	
-		Set<String> matches = new HashSet<String>();
-		
-		if (myPhrases != null && yourPhrases != null) {
-		
+		if(myPhrases == null || yourPhrases == null) {
+			return null;
+		}
+		else {
+			Set<String> matches = new HashSet<String>();
 			for (String mine : myPhrases) {
 				for (String yours : yourPhrases) {
 					if (mine.equalsIgnoreCase(yours)) {
@@ -145,8 +147,8 @@ public class PlagiarismDetector {
 					}
 				}
 			}
+			return matches;
 		}
-		return matches;
 	}
 	
 	/*
