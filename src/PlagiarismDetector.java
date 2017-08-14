@@ -44,7 +44,7 @@ public class PlagiarismDetector {
 								
 				if (matches.size() > threshold) {
 					String key = file1 + "-" + file2;
-					if (numberOfMatches.containsKey(file2 + "-" + file1) == false && file1.equals(file2) == false) {
+					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
 						numberOfMatches.put(key,matches.size());
 					}
 				}				
@@ -154,7 +154,10 @@ public class PlagiarismDetector {
 //		}	
 		
 		LinkedHashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
-
+		// what is another structure that would serve this purpose, and be smaller? 
+		// Must be a mapping, and must be in order
+		
+		
 		for (int i = 0; i < copy.size(); i++) {
 			int maxValue = 0;
 			String maxKey = null;
