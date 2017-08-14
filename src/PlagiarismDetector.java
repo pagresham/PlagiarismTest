@@ -1,6 +1,7 @@
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -41,12 +42,13 @@ public class PlagiarismDetector {
 				
 				// get the set of phrases from file2  //
 				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
-				
+				// Why would this return null? //
 				if (file2Phrases == null)
 					return null;
 				
+				// creates a Set<String> with the matching phrases between the two files //
 				Set<String> matches = findMatches(file1Phrases, file2Phrases);
-				
+				// Why would this return null? //
 				if (matches == null)
 					return null;
 				
@@ -75,8 +77,8 @@ public class PlagiarismDetector {
 	 */
 	protected static List<String> readFile(String filename) {
 		if (filename == null) return null;
-		
-		List<String> words = new LinkedList<String>();
+		// Changed the type of List to an ArrayList, since the contents are being accessed by their indexes //
+		List<String> words = new ArrayList<String>();
 		
 		try {
 			Scanner in = new Scanner(new File(filename));
