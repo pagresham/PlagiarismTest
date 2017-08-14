@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,61 +23,101 @@ import java.util.Set;
  * However, you may modify the signatures of any of the other methods as needed.
  */
 
+// 1. Creates an array of the file names contained in the 'corpus' dir.
+// 2. Creates a HashMap<String, Int> to hold a mapping of file-file names to number of matches between those files
+// 3. 
+
+
 public class PlagiarismDetector {
 
 	public static Map<String, Integer> detectPlagiarism(String dirName, int windowSize, int threshold) {
-		File dirFile = new File(dirName);
+//		File dirFile = new File(dirName);
 		// .list() gets a list of all the dirs inside the given directory //
-		String[] files = dirFile.list();
+		String[] files = new File(dirName).list();
 		// get length in var so it doesnt have to be calculated each time
 		int length = files.length;
 		
-		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
-		// go through list of files //
-		for (int i = 0; i < length; i++) {
-			// get each file //
-			String file1 = files[i];
-			
-			// Get the phrases from file 1
-			// instead of doing this for file1 each time, only create the file1 Set once
-			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
-			if ( file1Phrases == null ) {
-				return null;
-			}
-			// compare each file to every other file //
-			for (int j = 0; j < length; j++) { 
-				String file2 = files[j];
-				
-				// get the set of phrases from file2  //
-				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
-				// Why would this return null? //
-				if (file2Phrases == null)
-					return null;
-				
-				// Maybe instead of returning a Set of strings, and then checking its size, 
-				// find matches just returns an int.
-				
-				// creates a Set<String> with the matching phrases between the two files //
-				List<String> matches = findMatches(file1Phrases, file2Phrases);
-				// Why would this return null? //
-				if (matches == null)
-					return null;
-				int size = matches.size();
-				// checks if number of matches is above the given threshold value //
-				if (size > threshold) {
-					// creates the string for the key //
-					String key = file1 + "-" + file2;
-					// checks if string is already in numberOfMathces //
-					// checks if they are not the same file //
-					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
-						numberOfMatches.put(key, size);
-					}
-				}				
-			}
-			
-		}		
 		
-		return sortResults(numberOfMatches);
+		// What if instead, I get run createPhrase on every file once. Store those in a HashMap. 
+		// Then do the comparison of each file to each file. 
+		Map<String, Set<String>> allPhrases = new HashMap<>();
+		// For each file in the list, get a set of phrases 
+		for ( int i = 0 ;i < length; i++) {
+			Set<String> phrases = createPhrases(dirName + "/" + files[i], windowSize);
+			if(phrases == null) return null;
+			allPhrases.put(files[i], phrases);
+		}
+		System.out.println("allPhrases contains: " + allPhrases.size() + " elements" );
+		Map<String, Integer> numberOfMatches2 = new HashMap<String, Integer>();
+		for (int i = 0; i < length; i++ ) {
+			String file1 = files[i];
+			Set<String> outsidePhrases = allPhrases.get(files[i]);
+			for (int j = 0; j < length; j++ ) {
+				String file2 = files[j];
+				if(file1.equals(file2) || numberOfMatches2.containsKey(file2 + "-" + file1)) {
+					continue;
+				} else {
+					Set<String> insidePhrases = allPhrases.get(files[j]);
+					List<String> matches = findMatches(outsidePhrases, insidePhrases);
+					if (matches == null ) return null;
+					if (matches.size() > threshold) {
+						String key = files[i] + "-" + files[j];
+						 numberOfMatches2.put(key, matches.size());
+					}	
+				}
+			}
+		}
+		return sortResults(numberOfMatches2);
+		
+		
+		
+		
+		
+//		
+//		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
+//		// go through list of files //
+//		for (int i = 0; i < length; i++) {
+//			// get each file //
+//			String file1 = files[i];
+//			
+//			// Get the phrases from file 1
+//			// instead of doing this for file1 each time, only create the file1 Set once
+//			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+//			if ( file1Phrases == null ) {
+//				return null;
+//			}
+//			// compare each file to every other file //
+//			for (int j = 0; j < length; j++) { 
+//				String file2 = files[j];
+//				
+//				// get the set of phrases from file2  //
+//				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
+//				// Why would this return null? //
+//				if (file2Phrases == null)
+//					return null;
+//	
+//				
+//				// creates a Set<String> with the matching phrases between the two files //
+//				List<String> matches = findMatches(file1Phrases, file2Phrases);
+//				// Why would this return null? //
+//				if (matches == null)
+//					return null;
+//				int size = matches.size();
+//				// checks if number of matches is above the given threshold value //
+//				if (size > threshold) {
+//					// creates the string for the key //
+//					String key = file1 + "-" + file2;
+//					// checks if string is already in numberOfMathces //
+//					// checks if they are not the same file //
+//					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
+//						numberOfMatches.put(key, size);
+//					}
+//				}				
+//			}
+//			
+//		}		
+//		
+//		return sortResults(numberOfMatches);
 
 	}
 
@@ -146,7 +187,8 @@ public class PlagiarismDetector {
 	 */
 //	protected static Set<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
 	// Here I changed the return type from Set to ArrayList, 
-	protected static List<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
+//	protected static List<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {
+	protected static List<String> findMatches(Set<String> myPhrases, Set<String> yourPhrases) {	
 		if(myPhrases == null || yourPhrases == null) {
 			return null;
 		}
@@ -186,6 +228,7 @@ public class PlagiarismDetector {
 		// Must be a mapping, and must be in order
 		
 		
+		
 		for (int i = 0; i < copy.size(); i++) {
 			int maxValue = 0;
 			String maxKey = null;
@@ -199,6 +242,7 @@ public class PlagiarismDetector {
 			list.put(maxKey, maxValue);
 			// sets the values for the max key to be -1, so it is not considered the next time through. 
 			copy.put(maxKey, -1);
+//			copy.remove(maxKey);
 		}
 
 		return list;
