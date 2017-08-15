@@ -37,8 +37,6 @@ public class PlagiarismDetector {
 		// .list() gets a list of all the dirs inside the given directory //
 		String[] files = new File(dirName).list();
 		// get length in var so it doesnt have to be calculated each time
-
-		
 		
 		// What if instead, I get run createPhrase on every file once. Store those in a HashMap. 
 		// Then do the comparison of each file to each file. 
