@@ -152,7 +152,7 @@ public class PlagiarismDetector {
 				
 				for (String yours : yourPhrases) {
 					
-					if (mine.equalsIgnoreCase(yours)) {
+					if (mine.equals(yours)) {
 						matches.add(mine);
 					}
 				}
@@ -172,56 +172,12 @@ public class PlagiarismDetector {
 	 * are sorted according to the value of the Integer, in non-ascending order.
 	 */
 	protected static HashMap<String, Integer> sortResults(Map<String, Integer> possibleMatches) {
-		
-		
-		// write an embedded class that holds the values in the sorted result below. 
-		// make it implement compareable, and then use that to sort it. 
-		class SortedResult implements Comparable {
-			protected String key;
-			protected int matches;
-			public SortedResult(String key, int matches) {
-				this.key = key;
-				this.matches = matches;
-			}
-			@Override
-			public int compareTo(Object o) {
-				
-				int ans = this.matches - ((SortedResult) o).getMatches();
-				return ans;
-			}
-			public int getMatches() {
-				return matches;
-			}
-		}
-	
-		
-		
-		// take possibleMatches, put them into an array of sortResult objects. Then use compareTo() to sort them //
-//		List<SortedResult> results = new ArrayList<>();
-//		for (Entry<String, Integer> m : possibleMatches.entrySet()) {
-//			SortedResult s = new SortedResult(m.getKey(), m.getValue());
-//			results.add(s);
-//		}
-//		Collections.sort(results);
-//		System.out.println(results.toString());
 
-		
-		
-		
-		
-		
-		// Because this approach modifies the Map as a side effect of printing 
-		// the results, it is necessary to make a copy of the original Map
-		
-		// Makes a copy of the original arg hashmap.
-//		Map<String, Integer> copy = new HashMap<String, Integer>(possibleMatches);
 		
 		// creates a new hashmap that will get returned 
 		HashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
 		// what is another structure that would serve this purpose, and be smaller? 
 		// Must be a mapping, and must be in order
-		
-		
 		
 		for (int i = 0; i < possibleMatches.size(); i++) {
 			int maxValue = 0;
