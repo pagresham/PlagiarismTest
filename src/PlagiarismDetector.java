@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -31,30 +33,32 @@ import java.util.Set;
 public class PlagiarismDetector {
 
 	public static Map<String, Integer> detectPlagiarism(String dirName, int windowSize, int threshold) {
-//		File dirFile = new File(dirName);
+
 		// .list() gets a list of all the dirs inside the given directory //
 		String[] files = new File(dirName).list();
 		// get length in var so it doesnt have to be calculated each time
-		int length = files.length;
+
 		
 		
 		// What if instead, I get run createPhrase on every file once. Store those in a HashMap. 
 		// Then do the comparison of each file to each file. 
 		Map<String, Set<String>> allPhrases = new HashMap<>();
 		// For each file in the list, get a set of phrases 
-		for ( int i = 0 ;i < length; i++) {
+		for ( int i = 0 ;i < files.length; i++) {
 			Set<String> phrases = createPhrases(dirName + "/" + files[i], windowSize);
-			if(phrases == null) return null;
+			if(phrases == null) 
+				return null;
+			// Fills the Map with phrases for each file //
 			allPhrases.put(files[i], phrases);
 		}
-		System.out.println("allPhrases contains: " + allPhrases.size() + " elements" );
-		Map<String, Integer> numberOfMatches2 = new HashMap<String, Integer>();
-		for (int i = 0; i < length; i++ ) {
+//		System.out.println("allPhrases contains: " + allPhrases.size() + " elements" );
+		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
+		for (int i = 0; i < files.length; i++ ) {
 			String file1 = files[i];
 			Set<String> outsidePhrases = allPhrases.get(files[i]);
-			for (int j = 0; j < length; j++ ) {
+			for (int j = 0; j < files.length; j++ ) {
 				String file2 = files[j];
-				if(file1.equals(file2) || numberOfMatches2.containsKey(file2 + "-" + file1)) {
+				if(file1.equals(file2) || numberOfMatches.containsKey(file2 + "-" + file1)) {
 					continue;
 				} else {
 					Set<String> insidePhrases = allPhrases.get(files[j]);
@@ -62,63 +66,12 @@ public class PlagiarismDetector {
 					if (matches == null ) return null;
 					if (matches.size() > threshold) {
 						String key = files[i] + "-" + files[j];
-						 numberOfMatches2.put(key, matches.size());
+						 numberOfMatches.put(key, matches.size());
 					}	
 				}
 			}
 		}
-		return sortResults(numberOfMatches2);
-		
-		
-		
-		
-		
-//		
-//		Map<String, Integer> numberOfMatches = new HashMap<String, Integer>();
-//		// go through list of files //
-//		for (int i = 0; i < length; i++) {
-//			// get each file //
-//			String file1 = files[i];
-//			
-//			// Get the phrases from file 1
-//			// instead of doing this for file1 each time, only create the file1 Set once
-//			Set<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
-//			if ( file1Phrases == null ) {
-//				return null;
-//			}
-//			// compare each file to every other file //
-//			for (int j = 0; j < length; j++) { 
-//				String file2 = files[j];
-//				
-//				// get the set of phrases from file2  //
-//				Set<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
-//				// Why would this return null? //
-//				if (file2Phrases == null)
-//					return null;
-//	
-//				
-//				// creates a Set<String> with the matching phrases between the two files //
-//				List<String> matches = findMatches(file1Phrases, file2Phrases);
-//				// Why would this return null? //
-//				if (matches == null)
-//					return null;
-//				int size = matches.size();
-//				// checks if number of matches is above the given threshold value //
-//				if (size > threshold) {
-//					// creates the string for the key //
-//					String key = file1 + "-" + file2;
-//					// checks if string is already in numberOfMathces //
-//					// checks if they are not the same file //
-//					if (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2)) {
-//						numberOfMatches.put(key, size);
-//					}
-//				}				
-//			}
-//			
-//		}		
-//		
-//		return sortResults(numberOfMatches);
-
+		return sortResults(numberOfMatches);
 	}
 
 	
@@ -210,39 +163,79 @@ public class PlagiarismDetector {
 		
 	}
 	
+	
+	
+	
+
 	/*
 	 * Returns a LinkedHashMap in which the elements of the Map parameter
 	 * are sorted according to the value of the Integer, in non-ascending order.
 	 */
 	protected static HashMap<String, Integer> sortResults(Map<String, Integer> possibleMatches) {
 		
+		
+		// write an embedded class that holds the values in the sorted result below. 
+		// make it implement compareable, and then use that to sort it. 
+		class SortedResult implements Comparable {
+			protected String key;
+			protected int matches;
+			public SortedResult(String key, int matches) {
+				this.key = key;
+				this.matches = matches;
+			}
+			@Override
+			public int compareTo(Object o) {
+				
+				int ans = this.matches - ((SortedResult) o).getMatches();
+				return ans;
+			}
+			public int getMatches() {
+				return matches;
+			}
+		}
+	
+		
+		
+		// take possibleMatches, put them into an array of sortResult objects. Then use compareTo() to sort them //
+//		List<SortedResult> results = new ArrayList<>();
+//		for (Entry<String, Integer> m : possibleMatches.entrySet()) {
+//			SortedResult s = new SortedResult(m.getKey(), m.getValue());
+//			results.add(s);
+//		}
+//		Collections.sort(results);
+//		System.out.println(results.toString());
+
+		
+		
+		
+		
+		
 		// Because this approach modifies the Map as a side effect of printing 
 		// the results, it is necessary to make a copy of the original Map
 		
-		Map<String, Integer> copy = new HashMap<String, Integer>(possibleMatches);
-		// 1. I removed the code that was copying the structure. Instead used the API!
-	
+		// Makes a copy of the original arg hashmap.
+//		Map<String, Integer> copy = new HashMap<String, Integer>(possibleMatches);
 		
+		// creates a new hashmap that will get returned 
 		HashMap<String, Integer> list = new LinkedHashMap<String, Integer>();
 		// what is another structure that would serve this purpose, and be smaller? 
 		// Must be a mapping, and must be in order
 		
 		
 		
-		for (int i = 0; i < copy.size(); i++) {
+		for (int i = 0; i < possibleMatches.size(); i++) {
 			int maxValue = 0;
 			String maxKey = null;
-			for (String key : copy.keySet()) {
-				if (copy.get(key) > maxValue) {
-					maxValue = copy.get(key);
+			for (String key : possibleMatches.keySet()) {
+				if (possibleMatches.get(key) > maxValue) {
+					maxValue = possibleMatches.get(key);
 					maxKey = key;
 				}
 			}
 			// puts the current max key and value into the result Map
 			list.put(maxKey, maxValue);
 			// sets the values for the max key to be -1, so it is not considered the next time through. 
-			copy.put(maxKey, -1);
-//			copy.remove(maxKey);
+			possibleMatches.put(maxKey, -1);
 		}
 
 		return list;
