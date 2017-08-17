@@ -195,6 +195,7 @@ public class PlagiarismDetector {
 		// Calculate elapsed time //
 		double timeInSeconds = (end - start) / (double)1000;
 		System.out.println("Execution time (wall clock): " + timeInSeconds + " seconds");
+		// Display results
 		Set<Map.Entry<String, Integer>> entries = map.entrySet();
 		for (Map.Entry<String, Integer> entry : entries) {
 			System.out.println(entry.getKey() + ": " + entry.getValue());
